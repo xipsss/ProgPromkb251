@@ -144,6 +144,48 @@ namespace GeneticSearch
             }
         }
 
+        static void ExecuteDiff(List<Protein> proteins, string protein1Name, string protein2Name, List<string> output)
+        {
+            output.Add($"   diff   {protein1Name}   {protein2Name}");
+
+            Protein? p1 = null;
+            Protein? p2 = null;
+
+            foreach (var p in proteins)
+            {
+                if (p.name == protein1Name) p1 = p;
+                if (p.name == protein2Name) p2 = p;
+            }
+
+            if (p1 == null || p2 == null)
+            {
+                output.Add("amino-acids difference:");
+                string missing = "";
+                if (p1 == null) missing += protein1Name + " ";
+                if (p2 == null) missing += protein2Name + " ";
+                output.Add($"MISSING: {missing.Trim()}");
+                return;
+            }
+
+            string seq1 = p1.Value.amino_acids;
+            string seq2 = p2.Value.amino_acids;
+
+            int maxLen = Math.Max(seq1.Length, seq2.Length);
+            int diffCount = 0;
+
+            for (int i = 0; i < maxLen; i++)
+            {
+                char c1 = (i < seq1.Length) ? seq1[i] : '\0';
+                char c2 = (i < seq2.Length) ? seq2[i] : '\0';
+
+                if (c1 != c2)
+                    diffCount++;
+            }
+
+            output.Add("amino-acids difference:");
+            output.Add($"{diffCount} ");
+        }
+
         static void Main(string[] args)
         {
             Console.WriteLine("=== ГЕНЕТИЧЕСКИЙ ПОИСК ===\n");
@@ -159,13 +201,17 @@ namespace GeneticSearch
             Console.WriteLine($"Загружено белков: {data.Count}");
             Console.WriteLine($"Загружено команд: {commands.Count}");
 
-       
+    
+            Console.WriteLine("\n--- Тест search ---");
             List<string> testOutput = new List<string>();
             ExecuteSearch(data, "SIIK", testOutput);
-            foreach (var line in testOutput)
-            {
-                Console.WriteLine(line);
-            }
+            foreach (var line in testOutput) Console.WriteLine(line);
+
+    
+            Console.WriteLine("\n--- Тест diff ---");
+            testOutput = new List<string>();
+            ExecuteDiff(data, "6.8 kDa mitochondrial proteolipid", "Alcohol dehydrogenase", testOutput);
+            foreach (var line in testOutput) Console.WriteLine(line);
 
             Console.ReadKey();
         }
