@@ -22,6 +22,8 @@ namespace GeneticSearch
             public string parameter2;
         }
 
+        static int operationCounter = 0;
+
         static List<Command> ReadCommands(string filename)
         {
             StreamReader reader = new StreamReader(filename);
@@ -237,6 +239,56 @@ namespace GeneticSearch
             output.Add($"{mostFrequent}          {maxCount}");
         }
 
+        static void ProcessCommands(List<Protein> proteins, List<Command> commands, string outputFile)
+        {
+            List<string> outputLines = new List<string>();
+
+            outputLines.Add("Dwight Barnette");
+            outputLines.Add("Genetic Searching");
+            outputLines.Add("--------------------------------------------------------------------------");
+
+            operationCounter = 0;
+
+            foreach (var command in commands)
+            {
+                operationCounter++;
+                string opNumber = operationCounter.ToString("D3");
+
+                string commandLine = $"{opNumber}   {command.name.ToLower()}   {command.parameter1}";
+                if (!string.IsNullOrEmpty(command.parameter2))
+                {
+                    commandLine += $"   {command.parameter2}";
+                }
+                outputLines.Add(commandLine);
+
+                switch (command.name.ToLower())
+                {
+                    case "search":
+                        string searchSeq = RLEDecoding(command.parameter1);
+                        ExecuteSearch(proteins, searchSeq, outputLines);
+                        break;
+
+                    case "diff":
+                        ExecuteDiff(proteins, command.parameter1, command.parameter2, outputLines);
+                        break;
+
+                    case "mode":
+                        ExecuteMode(proteins, command.parameter1, outputLines);
+                        break;
+
+                    default:
+                        outputLines.Add($"Неизвестная операция: {command.name}");
+                        break;
+                }
+
+                outputLines.Add("--------------------------------------------------------------------------");
+            }
+
+            File.WriteAllLines(outputFile, outputLines, Encoding.UTF8);
+            Console.WriteLine($"\n✅ Результат записан в файл: {outputFile}");
+            Console.WriteLine($"   Всего обработано {operationCounter} команд");
+        }
+
         static void Main(string[] args)
         {
             Console.WriteLine("=== ГЕНЕТИЧЕСКИЙ ПОИСК ===\n");
@@ -245,6 +297,7 @@ namespace GeneticSearch
 
             string sequencesFile = $"sequences.{choice}.txt";
             string commandsFile = $"commands.{choice}.txt";
+            string outputFile = $"genedata.{choice}.txt";
 
             List<Protein> data = ReadData(sequencesFile);
             List<Command> commands = ReadCommands(commandsFile);
@@ -252,20 +305,7 @@ namespace GeneticSearch
             Console.WriteLine($"Загружено белков: {data.Count}");
             Console.WriteLine($"Загружено команд: {commands.Count}");
 
-            Console.WriteLine("\n--- Тест search ---");
-            List<string> testOutput = new List<string>();
-            ExecuteSearch(data, "SIIK", testOutput);
-            foreach (var line in testOutput) Console.WriteLine(line);
-
-            Console.WriteLine("\n--- Тест diff ---");
-            testOutput = new List<string>();
-            ExecuteDiff(data, "6.8 kDa mitochondrial proteolipid", "Alcohol dehydrogenase", testOutput);
-            foreach (var line in testOutput) Console.WriteLine(line);
-
-            Console.WriteLine("\n--- Тест mode ---");
-            testOutput = new List<string>();
-            ExecuteMode(data, "Cecropin", testOutput);
-            foreach (var line in testOutput) Console.WriteLine(line);
+            ProcessCommands(data, commands, outputFile);
 
             Console.ReadKey();
         }
