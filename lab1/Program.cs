@@ -186,6 +186,57 @@ namespace GeneticSearch
             output.Add($"{diffCount} ");
         }
 
+        static void ExecuteMode(List<Protein> proteins, string proteinName, List<string> output)
+        {
+            output.Add($"   mode   {proteinName} ");
+
+            Protein? target = null;
+            foreach (var p in proteins)
+            {
+                if (p.name == proteinName)
+                {
+                    target = p;
+                    break;
+                }
+            }
+
+            if (target == null)
+            {
+                output.Add("amino-acid occurs:");
+                output.Add($"MISSING: {proteinName}");
+                return;
+            }
+
+            string sequence = target.Value.amino_acids;
+
+            Dictionary<char, int> frequency = new Dictionary<char, int>();
+
+            foreach (char c in sequence)
+            {
+                if (frequency.ContainsKey(c))
+                    frequency[c]++;
+                else
+                    frequency[c] = 1;
+            }
+
+            int maxCount = 0;
+            char mostFrequent = '\0';
+            bool first = true;
+
+            foreach (var kvp in frequency)
+            {
+                if (kvp.Value > maxCount || (kvp.Value == maxCount && (first || kvp.Key < mostFrequent)))
+                {
+                    maxCount = kvp.Value;
+                    mostFrequent = kvp.Key;
+                    first = false;
+                }
+            }
+
+            output.Add("amino-acid occurs:");
+            output.Add($"{mostFrequent}          {maxCount}");
+        }
+
         static void Main(string[] args)
         {
             Console.WriteLine("=== ГЕНЕТИЧЕСКИЙ ПОИСК ===\n");
@@ -201,16 +252,19 @@ namespace GeneticSearch
             Console.WriteLine($"Загружено белков: {data.Count}");
             Console.WriteLine($"Загружено команд: {commands.Count}");
 
-    
             Console.WriteLine("\n--- Тест search ---");
             List<string> testOutput = new List<string>();
             ExecuteSearch(data, "SIIK", testOutput);
             foreach (var line in testOutput) Console.WriteLine(line);
 
-    
             Console.WriteLine("\n--- Тест diff ---");
             testOutput = new List<string>();
             ExecuteDiff(data, "6.8 kDa mitochondrial proteolipid", "Alcohol dehydrogenase", testOutput);
+            foreach (var line in testOutput) Console.WriteLine(line);
+
+            Console.WriteLine("\n--- Тест mode ---");
+            testOutput = new List<string>();
+            ExecuteMode(data, "Cecropin", testOutput);
             foreach (var line in testOutput) Console.WriteLine(line);
 
             Console.ReadKey();
