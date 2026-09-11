@@ -291,22 +291,62 @@ namespace GeneticSearch
 
         static void Main(string[] args)
         {
-            Console.WriteLine("=== ГЕНЕТИЧЕСКИЙ ПОИСК ===\n");
-            Console.Write("Введите номер набора (0, 1, 2): ");
-            string choice = Console.ReadLine();
+            try
+            {
+                Console.WriteLine("=== ГЕНЕТИЧЕСКИЙ ПОИСК ===\n");
+                Console.WriteLine("Выберите набор файлов для тестирования:");
+                Console.WriteLine("  0 - sequences.0.txt, commands.0.txt");
+                Console.WriteLine("  1 - sequences.1.txt, commands.1.txt");
+                Console.WriteLine("  2 - sequences.2.txt, commands.2.txt");
+                Console.Write("Введите номер (0, 1, 2): ");
+                string choice = Console.ReadLine();
 
-            string sequencesFile = $"sequences.{choice}.txt";
-            string commandsFile = $"commands.{choice}.txt";
-            string outputFile = $"genedata.{choice}.txt";
+                string suffix = choice;
+                string sequencesFile = $"sequences.{suffix}.txt";
+                string commandsFile = $"commands.{suffix}.txt";
+                string outputFile = $"genedata.{suffix}.txt";
 
-            List<Protein> data = ReadData(sequencesFile);
-            List<Command> commands = ReadCommands(commandsFile);
+                string currentDir = Directory.GetCurrentDirectory();
+                Console.WriteLine($"\nТекущая папка: {currentDir}");
 
-            Console.WriteLine($"Загружено белков: {data.Count}");
-            Console.WriteLine($"Загружено команд: {commands.Count}");
+                if (!File.Exists(sequencesFile))
+                {
+                    Console.WriteLine($"⚠️ Файл {sequencesFile} не найден!");
+                    Console.WriteLine($"   Убедитесь, что файлы лежат в папке: {currentDir}");
+                    Console.WriteLine("\nНажмите любую клавишу для выхода...");
+                    Console.ReadKey();
+                    return;
+                }
 
-            ProcessCommands(data, commands, outputFile);
+                Console.WriteLine($"\nЧтение файла: {sequencesFile}");
+                List<Protein> data = ReadData(sequencesFile);
 
+                Console.WriteLine($"Загружено {data.Count} белков:");
+                Console.WriteLine("----------------------------------------");
+                foreach (var p in data)
+                {
+                    Console.WriteLine($"Организм: {p.organism}");
+                    Console.WriteLine($"Белок:    {p.name}");
+                    Console.WriteLine($"Цепочка:  {p.amino_acids.Substring(0, Math.Min(40, p.amino_acids.Length))}...");
+                    Console.WriteLine("----------------------------------------");
+                }
+
+                Console.WriteLine($"\nЧтение файла: {commandsFile}");
+                List<Command> commands = ReadCommands(commandsFile);
+                Console.WriteLine($"Загружено {commands.Count} команд");
+
+                Console.WriteLine("\n=== ОБРАБОТКА КОМАНД ===");
+                ProcessCommands(data, commands, outputFile);
+
+                Console.WriteLine($"\nСравните созданный файл {outputFile} с эталонным genedata.{suffix}.txt");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\n❌ ОШИБКА: {ex.Message}");
+                Console.WriteLine($"   {ex.StackTrace}");
+            }
+
+            Console.WriteLine("\nНажмите любую клавишу для выхода...");
             Console.ReadKey();
         }
     }
