@@ -122,6 +122,28 @@ namespace GeneticSearch
             return decoded;
         }
 
+        static void ExecuteSearch(List<Protein> proteins, string searchSequence, List<string> output)
+        {
+            output.Add($"   search   {searchSequence}");
+            output.Add($"organism\t\t\tprotein ");
+
+            bool found = false;
+
+            foreach (var protein in proteins)
+            {
+                if (protein.amino_acids.Contains(searchSequence))
+                {
+                    output.Add($"{protein.organism}\t\t{protein.name}");
+                    found = true;
+                }
+            }
+
+            if (!found)
+            {
+                output.Add($"NOT FOUND");
+            }
+        }
+
         static void Main(string[] args)
         {
             Console.WriteLine("=== ГЕНЕТИЧЕСКИЙ ПОИСК ===\n");
@@ -137,10 +159,12 @@ namespace GeneticSearch
             Console.WriteLine($"Загружено белков: {data.Count}");
             Console.WriteLine($"Загружено команд: {commands.Count}");
 
-            foreach (var p in data)
+       
+            List<string> testOutput = new List<string>();
+            ExecuteSearch(data, "SIIK", testOutput);
+            foreach (var line in testOutput)
             {
-                Console.WriteLine($"\nБелок: {p.name}");
-                Console.WriteLine($"Декодировано: {p.amino_acids.Substring(0, Math.Min(40, p.amino_acids.Length))}...");
+                Console.WriteLine(line);
             }
 
             Console.ReadKey();
