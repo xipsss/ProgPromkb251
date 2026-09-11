@@ -59,12 +59,67 @@ namespace GeneticSearch
                     Protein protein;
                     protein.name = parts[0].Trim();
                     protein.organism = parts[1].Trim();
-                    protein.amino_acids = parts[2].Trim();
+                    protein.amino_acids = RLEDecoding(parts[2].Trim());
                     data.Add(protein);
                 }
             }
             reader.Close();
             return data;
+        }
+
+        static string RLEEncoding(string amino_acids)
+        {
+            if (string.IsNullOrEmpty(amino_acids)) return amino_acids;
+
+            string encoded = "";
+            for (int i = 0; i < amino_acids.Length; i++)
+            {
+                char ch = amino_acids[i];
+                int count = 1;
+                while (i < amino_acids.Length - 1 && amino_acids[i + 1] == ch)
+                {
+                    count++;
+                    i++;
+                }
+                if (count > 2) encoded = encoded + count + ch;
+                else if (count == 1) encoded = encoded + ch;
+                else if (count == 2) encoded = encoded + ch + ch;
+            }
+            return encoded;
+        }
+
+        static string RLEDecoding(string amino_acids)
+        {
+            if (string.IsNullOrEmpty(amino_acids)) return amino_acids;
+
+            string decoded = "";
+            for (int i = 0; i < amino_acids.Length; i++)
+            {
+                if (char.IsDigit(amino_acids[i]))
+                {
+                    string countStr = "";
+                    while (i < amino_acids.Length && char.IsDigit(amino_acids[i]))
+                    {
+                        countStr += amino_acids[i];
+                        i++;
+                    }
+
+                    if (i < amino_acids.Length)
+                    {
+                        char letter = amino_acids[i];
+                        int count = int.Parse(countStr);
+                        for (int j = 0; j < count; j++)
+                        {
+                            decoded += letter;
+                        }
+                    }
+                }
+                else
+                {
+                    decoded += amino_acids[i];
+                }
+            }
+            return decoded;
         }
 
         static void Main(string[] args)
@@ -81,6 +136,13 @@ namespace GeneticSearch
 
             Console.WriteLine($"Загружено белков: {data.Count}");
             Console.WriteLine($"Загружено команд: {commands.Count}");
+
+            foreach (var p in data)
+            {
+                Console.WriteLine($"\nБелок: {p.name}");
+                Console.WriteLine($"Декодировано: {p.amino_acids.Substring(0, Math.Min(40, p.amino_acids.Length))}...");
+            }
+
             Console.ReadKey();
         }
     }
