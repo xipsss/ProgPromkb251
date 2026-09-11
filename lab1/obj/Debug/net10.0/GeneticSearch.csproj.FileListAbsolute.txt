@@ -12,3 +12,18 @@ C:\Users\Admin\Desktop\cpp\2 sem\GeneticSearch\obj\Debug\net10.0\refint\GeneticS
 C:\Users\Admin\Desktop\cpp\2 sem\GeneticSearch\obj\Debug\net10.0\GeneticSearch.pdb
 C:\Users\Admin\Desktop\cpp\2 sem\GeneticSearch\obj\Debug\net10.0\GeneticSearch.genruntimeconfig.cache
 C:\Users\Admin\Desktop\cpp\2 sem\GeneticSearch\obj\Debug\net10.0\ref\GeneticSearch.dll
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\bin\Debug\net10.0\GeneticSearch.exe
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\bin\Debug\net10.0\GeneticSearch.deps.json
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\bin\Debug\net10.0\GeneticSearch.runtimeconfig.json
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\bin\Debug\net10.0\GeneticSearch.dll
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\bin\Debug\net10.0\GeneticSearch.pdb
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\obj\Debug\net10.0\GeneticSearch.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\obj\Debug\net10.0\GeneticSearch.AssemblyInfoInputs.cache
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\obj\Debug\net10.0\GeneticSearch.AssemblyInfo.cs
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\obj\Debug\net10.0\GeneticSearch.csproj.CoreCompileInputs.cache
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\obj\Debug\net10.0\GeneticSearch.sourcelink.json
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\obj\Debug\net10.0\GeneticSearch.dll
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\obj\Debug\net10.0\refint\GeneticSearch.dll
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\obj\Debug\net10.0\GeneticSearch.pdb
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\obj\Debug\net10.0\GeneticSearch.genruntimeconfig.cache
+C:\Users\Admin\Desktop\ProgPromkb251\lab1\obj\Debug\net10.0\ref\GeneticSearch.dll

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Admin\\Desktop\\cpp\\2 sem\\GeneticSearch\\GeneticSearch.csproj": {}
+    "C:\\Users\\Admin\\Desktop\\ProgPromkb251\\lab1\\GeneticSearch.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Admin\\Desktop\\cpp\\2 sem\\GeneticSearch\\GeneticSearch.csproj": {
+    "C:\\Users\\Admin\\Desktop\\ProgPromkb251\\lab1\\GeneticSearch.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Admin\\Desktop\\cpp\\2 sem\\GeneticSearch\\GeneticSearch.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\Desktop\\ProgPromkb251\\lab1\\GeneticSearch.csproj",
         "projectName": "GeneticSearch",
-        "projectPath": "C:\\Users\\Admin\\Desktop\\cpp\\2 sem\\GeneticSearch\\GeneticSearch.csproj",
+        "projectPath": "C:\\Users\\Admin\\Desktop\\ProgPromkb251\\lab1\\GeneticSearch.csproj",
         "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Admin\\Desktop\\cpp\\2 sem\\GeneticSearch\\obj\\",
+        "outputPath": "C:\\Users\\Admin\\Desktop\\ProgPromkb251\\lab1\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

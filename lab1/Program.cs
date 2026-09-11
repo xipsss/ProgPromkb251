@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace GeneticSearch
@@ -26,324 +25,337 @@ namespace GeneticSearch
 
         static List<Command> ReadCommands(string filename)
         {
-            StreamReader reader = new StreamReader(filename);
-            List<Command> commands = new List<Command>();
-
-            while (!reader.EndOfStream)
+            var commands = new List<Command>();
+            using (var reader = new StreamReader(filename))
             {
-                string line = reader.ReadLine();
-                if (string.IsNullOrWhiteSpace(line)) continue;
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(line)) continue;
 
-                string[] parts = line.Split('\t');
-                Command command;
-                command.name = parts[0].Trim();
-                command.parameter1 = parts.Length > 1 ? parts[1].Trim() : "";
-                command.parameter2 = parts.Length > 2 ? parts[2].Trim() : "";
-                commands.Add(command);
+                    string[] parts = line.Split('\t');
+                    commands.Add(new Command
+                    {
+                        name = parts[0].Trim(),
+                        parameter1 = parts.Length > 1 ? parts[1].Trim() : "",
+                        parameter2 = parts.Length > 2 ? parts[2].Trim() : ""
+                    });
+                }
             }
-            reader.Close();
             return commands;
         }
 
         static List<Protein> ReadData(string filename)
         {
-            StreamReader reader = new StreamReader(filename);
-            List<Protein> data = new List<Protein>();
-
-            while (!reader.EndOfStream)
+            var data = new List<Protein>();
+            using (var reader = new StreamReader(filename))
             {
-                string line = reader.ReadLine();
-                if (string.IsNullOrWhiteSpace(line)) continue;
-
-                string[] parts = line.Split('\t');
-                if (parts.Length >= 3)
+                while (!reader.EndOfStream)
                 {
-                    Protein protein;
-                    protein.name = parts[0].Trim();
-                    protein.organism = parts[1].Trim();
-                    protein.amino_acids = RLEDecoding(parts[2].Trim());
-                    data.Add(protein);
+                    string line = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+
+                    string[] parts = line.Split('\t');
+                    if (parts.Length >= 3)
+                    {
+                        data.Add(new Protein
+                        {
+                            name = parts[0].Trim(),
+                            organism = parts[1].Trim(),
+                            amino_acids = RLEDecoding(parts[2].Trim())
+                        });
+                    }
                 }
             }
-            reader.Close();
             return data;
         }
 
-        static string RLEEncoding(string amino_acids)
+        static string RLEEncoding(string s)
         {
-            if (string.IsNullOrEmpty(amino_acids)) return amino_acids;
+            if (string.IsNullOrEmpty(s)) return s;
 
-            string encoded = "";
-            for (int i = 0; i < amino_acids.Length; i++)
+            string result = "";
+            for (int i = 0; i < s.Length; i++)
             {
-                char ch = amino_acids[i];
+                char ch = s[i];
                 int count = 1;
-                while (i < amino_acids.Length - 1 && amino_acids[i + 1] == ch)
-                {
-                    count++;
-                    i++;
-                }
-                if (count > 2) encoded = encoded + count + ch;
-                else if (count == 1) encoded = encoded + ch;
-                else if (count == 2) encoded = encoded + ch + ch;
+                while (i < s.Length - 1 && s[i + 1] == ch) { count++; i++; }
+
+                if (count > 2) result += count + ch.ToString();
+                else if (count == 1) result += ch;
+                else result += ch.ToString() + ch;
             }
-            return encoded;
+            return result;
         }
 
-        static string RLEDecoding(string amino_acids)
+        static string RLEDecoding(string s)
         {
-            if (string.IsNullOrEmpty(amino_acids)) return amino_acids;
+            if (string.IsNullOrEmpty(s)) return s;
 
-            string decoded = "";
-            for (int i = 0; i < amino_acids.Length; i++)
+            string result = "";
+            for (int i = 0; i < s.Length; i++)
             {
-                if (char.IsDigit(amino_acids[i]))
+                if (char.IsDigit(s[i]))
                 {
-                    string countStr = "";
-                    while (i < amino_acids.Length && char.IsDigit(amino_acids[i]))
-                    {
-                        countStr += amino_acids[i];
-                        i++;
-                    }
+                    string num = "";
+                    while (i < s.Length && char.IsDigit(s[i])) { num += s[i]; i++; }
 
-                    if (i < amino_acids.Length)
+                    if (i < s.Length)
                     {
-                        char letter = amino_acids[i];
-                        int count = int.Parse(countStr);
-                        for (int j = 0; j < count; j++)
-                        {
-                            decoded += letter;
-                        }
+                        int count = int.Parse(num);
+                        for (int j = 0; j < count; j++) result += s[i];
                     }
                 }
-                else
-                {
-                    decoded += amino_acids[i];
-                }
+                else result += s[i];
             }
-            return decoded;
+            return result;
         }
 
-        static void ExecuteSearch(List<Protein> proteins, string searchSequence, List<string> output)
+        static void HandleSearch(List<Protein> proteins, Command cmd, List<string> output)
         {
-            output.Add($"   search   {searchSequence}");
-            output.Add($"organism\t\t\tprotein ");
+            ExecuteSearch(proteins, RLEDecoding(cmd.parameter1), output);
+        }
+
+        static void HandleDiff(List<Protein> proteins, Command cmd, List<string> output)
+        {
+            ExecuteDiff(proteins, cmd.parameter1, cmd.parameter2, output);
+        }
+
+        static void HandleMode(List<Protein> proteins, Command cmd, List<string> output)
+        {
+            ExecuteMode(proteins, cmd.parameter1, output);
+        }
+
+        static void ExecuteSearch(List<Protein> proteins, string searchSeq, List<string> output)
+        {
+            output.Add($"   search   {searchSeq}");
+            output.Add("organism\t\t\tprotein ");
 
             bool found = false;
-
-            foreach (var protein in proteins)
+            foreach (var p in proteins)
             {
-                if (protein.amino_acids.Contains(searchSequence))
+                if (p.amino_acids.Contains(searchSeq))
                 {
-                    output.Add($"{protein.organism}\t\t{protein.name}");
+                    output.Add($"{p.organism}\t\t{p.name}");
                     found = true;
                 }
             }
-
-            if (!found)
-            {
-                output.Add($"NOT FOUND");
-            }
+            if (!found) output.Add("NOT FOUND");
         }
 
-        static void ExecuteDiff(List<Protein> proteins, string protein1Name, string protein2Name, List<string> output)
+        static void ExecuteDiff(List<Protein> proteins, string name1, string name2, List<string> output)
         {
-            output.Add($"   diff   {protein1Name}   {protein2Name}");
+            output.Add($"   diff   {name1}   {name2}");
 
-            Protein? p1 = null;
-            Protein? p2 = null;
-
+            Protein? p1 = null, p2 = null;
             foreach (var p in proteins)
             {
-                if (p.name == protein1Name) p1 = p;
-                if (p.name == protein2Name) p2 = p;
+                if (p.name == name1) p1 = p;
+                if (p.name == name2) p2 = p;
             }
 
+            output.Add("amino-acids difference:");
             if (p1 == null || p2 == null)
             {
-                output.Add("amino-acids difference:");
                 string missing = "";
-                if (p1 == null) missing += protein1Name + " ";
-                if (p2 == null) missing += protein2Name + " ";
+                if (p1 == null) missing += name1 + " ";
+                if (p2 == null) missing += name2 + " ";
                 output.Add($"MISSING: {missing.Trim()}");
                 return;
             }
 
-            string seq1 = p1.Value.amino_acids;
-            string seq2 = p2.Value.amino_acids;
-
-            int maxLen = Math.Max(seq1.Length, seq2.Length);
-            int diffCount = 0;
+            string s1 = p1.Value.amino_acids, s2 = p2.Value.amino_acids;
+            int maxLen = Math.Max(s1.Length, s2.Length);
+            int diff = 0;
 
             for (int i = 0; i < maxLen; i++)
             {
-                char c1 = (i < seq1.Length) ? seq1[i] : '\0';
-                char c2 = (i < seq2.Length) ? seq2[i] : '\0';
-
-                if (c1 != c2)
-                    diffCount++;
+                char c1 = i < s1.Length ? s1[i] : '\0';
+                char c2 = i < s2.Length ? s2[i] : '\0';
+                if (c1 != c2) diff++;
             }
 
-            output.Add("amino-acids difference:");
-            output.Add($"{diffCount} ");
+            output.Add($"{diff} ");
         }
 
-        static void ExecuteMode(List<Protein> proteins, string proteinName, List<string> output)
+        static void ExecuteMode(List<Protein> proteins, string name, List<string> output)
         {
-            output.Add($"   mode   {proteinName} ");
+            output.Add($"   mode   {name} ");
 
             Protein? target = null;
             foreach (var p in proteins)
-            {
-                if (p.name == proteinName)
-                {
-                    target = p;
-                    break;
-                }
-            }
+                if (p.name == name) { target = p; break; }
 
+            output.Add("amino-acid occurs:");
             if (target == null)
             {
-                output.Add("amino-acid occurs:");
-                output.Add($"MISSING: {proteinName}");
+                output.Add($"MISSING: {name}");
                 return;
             }
 
-            string sequence = target.Value.amino_acids;
+            var freq = new Dictionary<char, int>();
+            foreach (char c in target.Value.amino_acids)
+                freq[c] = freq.ContainsKey(c) ? freq[c] + 1 : 1;
 
-            Dictionary<char, int> frequency = new Dictionary<char, int>();
-
-            foreach (char c in sequence)
-            {
-                if (frequency.ContainsKey(c))
-                    frequency[c]++;
-                else
-                    frequency[c] = 1;
-            }
-
-            int maxCount = 0;
-            char mostFrequent = '\0';
+            int max = 0;
+            char best = '\0';
             bool first = true;
 
-            foreach (var kvp in frequency)
+            foreach (var kv in freq)
             {
-                if (kvp.Value > maxCount || (kvp.Value == maxCount && (first || kvp.Key < mostFrequent)))
+                if (kv.Value > max || (kv.Value == max && (first || kv.Key < best)))
                 {
-                    maxCount = kvp.Value;
-                    mostFrequent = kvp.Key;
+                    max = kv.Value;
+                    best = kv.Key;
                     first = false;
                 }
             }
 
-            output.Add("amino-acid occurs:");
-            output.Add($"{mostFrequent}          {maxCount}");
+            output.Add($"{best}          {max}");
+        }
+
+        static void DispatchCommand(List<Protein> proteins, Command cmd, List<string> output)
+        {
+            switch (cmd.name.ToLower())
+            {
+                case "search": HandleSearch(proteins, cmd, output); break;
+                case "diff":   HandleDiff(proteins, cmd, output);   break;
+                case "mode":   HandleMode(proteins, cmd, output);   break;
+                default:       output.Add($"Неизвестная операция: {cmd.name}"); break;
+            }
+        }
+
+        static string FormatCommandLine(int number, Command cmd)
+        {
+            string line = $"{number:D3}   {cmd.name.ToLower()}   {cmd.parameter1}";
+            if (!string.IsNullOrEmpty(cmd.parameter2)) line += $"   {cmd.parameter2}";
+            return line;
         }
 
         static void ProcessCommands(List<Protein> proteins, List<Command> commands, string outputFile)
         {
-            List<string> outputLines = new List<string>();
-
-            outputLines.Add("Dwight Barnette");
-            outputLines.Add("Genetic Searching");
-            outputLines.Add("--------------------------------------------------------------------------");
+            var outputLines = new List<string>
+            {
+                "Dwight Barnette",
+                "Genetic Searching",
+                "--------------------------------------------------------------------------"
+            };
 
             operationCounter = 0;
-
-            foreach (var command in commands)
+            foreach (var cmd in commands)
             {
                 operationCounter++;
-                string opNumber = operationCounter.ToString("D3");
-
-                string commandLine = $"{opNumber}   {command.name.ToLower()}   {command.parameter1}";
-                if (!string.IsNullOrEmpty(command.parameter2))
-                {
-                    commandLine += $"   {command.parameter2}";
-                }
-                outputLines.Add(commandLine);
-
-                switch (command.name.ToLower())
-                {
-                    case "search":
-                        string searchSeq = RLEDecoding(command.parameter1);
-                        ExecuteSearch(proteins, searchSeq, outputLines);
-                        break;
-
-                    case "diff":
-                        ExecuteDiff(proteins, command.parameter1, command.parameter2, outputLines);
-                        break;
-
-                    case "mode":
-                        ExecuteMode(proteins, command.parameter1, outputLines);
-                        break;
-
-                    default:
-                        outputLines.Add($"Неизвестная операция: {command.name}");
-                        break;
-                }
-
+                outputLines.Add(FormatCommandLine(operationCounter, cmd));
+                DispatchCommand(proteins, cmd, outputLines);
                 outputLines.Add("--------------------------------------------------------------------------");
             }
 
+            if (File.Exists(outputFile))
+            {
+                Console.Write($"\nФайл {outputFile} уже существует. Перезаписать? (y/n): ");
+                if (Console.ReadLine()?.ToLower() != "y")
+                {
+                    Console.WriteLine("Запись отменена.");
+                    return;
+                }
+            }
+
             File.WriteAllLines(outputFile, outputLines, Encoding.UTF8);
-            Console.WriteLine($"\n✅ Результат записан в файл: {outputFile}");
-            Console.WriteLine($"   Всего обработано {operationCounter} команд");
+            Console.WriteLine($"\nЗаписано в {outputFile}. Обработано {operationCounter} команд");
+        }
+
+        static string ReadChoice(string label)
+        {
+            while (true)
+            {
+                Console.WriteLine($"\nВыберите номер для {label}:");
+                Console.WriteLine($"  0 - {label.ToLower()}.0.txt");
+                Console.WriteLine($"  1 - {label.ToLower()}.1.txt");
+                Console.WriteLine($"  2 - {label.ToLower()}.2.txt");
+                Console.Write("Введите номер (0, 1, 2): ");
+
+                string input = Console.ReadLine();
+                if (input == "0" || input == "1" || input == "2") return input;
+
+                Console.WriteLine("Неверный ввод!");
+            }
+        }
+
+        static bool CheckFile(string filename)
+        {
+            if (File.Exists(filename)) return true;
+            Console.WriteLine($"Файл {filename} не найден!");
+            Console.WriteLine($"   Текущая папка: {Directory.GetCurrentDirectory()}");
+            return false;
+        }
+
+        static void PrintProteins(List<Protein> data)
+        {
+            Console.WriteLine($"Загружено {data.Count} белков:");
+            foreach (var p in data)
+            {
+                Console.WriteLine("----------------------------------------");
+                Console.WriteLine($"Организм: {p.organism}");
+                Console.WriteLine($"Белок:    {p.name}");
+                int len = Math.Min(40, p.amino_acids.Length);
+                Console.WriteLine($"Цепочка:  {p.amino_acids.Substring(0, len)}...");
+            }
+            Console.WriteLine("----------------------------------------");
+        }
+
+        static bool AskRestart()
+        {
+            while (true)
+            {
+                Console.Write("\nЗапустить снова? (y/n): ");
+                string answer = Console.ReadLine()?.ToLower().Trim();
+
+                if (answer == "y" || answer == "yes" || answer == "д" || answer == "да") return true;
+                if (answer == "n" || answer == "no" || answer == "н" || answer == "нет") return false;
+
+                Console.WriteLine("Введите y или n.");
+            }
         }
 
         static void Main(string[] args)
         {
-            try
+            Console.WriteLine("=== ГЕНЕТИЧЕСКИЙ ПОИСК ===");
+
+            bool restart = true;
+            while (restart)
             {
-                Console.WriteLine("=== ГЕНЕТИЧЕСКИЙ ПОИСК ===\n");
-                Console.WriteLine("Выберите набор файлов для тестирования:");
-                Console.WriteLine("  0 - sequences.0.txt, commands.0.txt");
-                Console.WriteLine("  1 - sequences.1.txt, commands.1.txt");
-                Console.WriteLine("  2 - sequences.2.txt, commands.2.txt");
-                Console.Write("Введите номер (0, 1, 2): ");
-                string choice = Console.ReadLine();
-
-                string suffix = choice;
-                string sequencesFile = $"sequences.{suffix}.txt";
-                string commandsFile = $"commands.{suffix}.txt";
-                string outputFile = $"genedata.{suffix}.txt";
-
-                string currentDir = Directory.GetCurrentDirectory();
-                Console.WriteLine($"\nТекущая папка: {currentDir}");
-
-                if (!File.Exists(sequencesFile))
+                try
                 {
-                    Console.WriteLine($"⚠️ Файл {sequencesFile} не найден!");
-                    Console.WriteLine($"   Убедитесь, что файлы лежат в папке: {currentDir}");
-                    Console.WriteLine("\nНажмите любую клавишу для выхода...");
-                    Console.ReadKey();
-                    return;
+                    string seqChoice = ReadChoice("SEQUENCES");
+                    string cmdChoice = ReadChoice("COMMANDS");
+
+                    string sequencesFile = $"sequences.{seqChoice}.txt";
+                    string commandsFile = $"commands.{cmdChoice}.txt";
+                    string outputFile = $"genedata.{seqChoice}_{cmdChoice}.txt";
+
+                    if (!CheckFile(sequencesFile) || !CheckFile(commandsFile))
+                    {
+                        restart = AskRestart();
+                        continue;
+                    }
+
+                    Console.WriteLine($"\nЧтение файла: {sequencesFile}");
+                    var data = ReadData(sequencesFile);
+                    PrintProteins(data);
+
+                    Console.WriteLine($"\nЧтение файла: {commandsFile}");
+                    var commands = ReadCommands(commandsFile);
+                    Console.WriteLine($"Загружено {commands.Count} команд");
+
+                    Console.WriteLine("\n=== ОБРАБОТКА КОМАНД ===");
+                    ProcessCommands(data, commands, outputFile);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"\nОШИБКА: {ex.Message}");
                 }
 
-                Console.WriteLine($"\nЧтение файла: {sequencesFile}");
-                List<Protein> data = ReadData(sequencesFile);
-
-                Console.WriteLine($"Загружено {data.Count} белков:");
-                Console.WriteLine("----------------------------------------");
-                foreach (var p in data)
-                {
-                    Console.WriteLine($"Организм: {p.organism}");
-                    Console.WriteLine($"Белок:    {p.name}");
-                    Console.WriteLine($"Цепочка:  {p.amino_acids.Substring(0, Math.Min(40, p.amino_acids.Length))}...");
-                    Console.WriteLine("----------------------------------------");
-                }
-
-                Console.WriteLine($"\nЧтение файла: {commandsFile}");
-                List<Command> commands = ReadCommands(commandsFile);
-                Console.WriteLine($"Загружено {commands.Count} команд");
-
-                Console.WriteLine("\n=== ОБРАБОТКА КОМАНД ===");
-                ProcessCommands(data, commands, outputFile);
-
-                Console.WriteLine($"\nСравните созданный файл {outputFile} с эталонным genedata.{suffix}.txt");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"\n❌ ОШИБКА: {ex.Message}");
-                Console.WriteLine($"   {ex.StackTrace}");
+                restart = AskRestart();
             }
 
             Console.WriteLine("\nНажмите любую клавишу для выхода...");

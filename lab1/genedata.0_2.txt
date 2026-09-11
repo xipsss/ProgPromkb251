@@ -1,0 +1,33 @@
+﻿Dwight Barnette
+Genetic Searching
+--------------------------------------------------------------------------
+001   diff   PREDICTED: similar to double homeobox   metallothionein 2A
+   diff   PREDICTED: similar to double homeobox   metallothionein 2A
+amino-acids difference:
+MISSING: PREDICTED: similar to double homeobox metallothionein 2A
+--------------------------------------------------------------------------
+002   search   VLLYISSVYVLPRYN
+   search   VLLYISSVYVLPRYN
+organism			protein 
+NOT FOUND
+--------------------------------------------------------------------------
+003   mode   C-FLIP AMPA glutamate
+   mode   C-FLIP AMPA glutamate 
+amino-acid occurs:
+MISSING: C-FLIP AMPA glutamate
+--------------------------------------------------------------------------
+004   diff   Cecropin   Cecropin
+   diff   Cecropin   Cecropin
+amino-acids difference:
+0 
+--------------------------------------------------------------------------
+005   search   LIVM
+   search   LIVM
+organism			protein 
+NOT FOUND
+--------------------------------------------------------------------------
+006   mode   metallothionein 2A
+   mode   metallothionein 2A 
+amino-acid occurs:
+MISSING: metallothionein 2A
+--------------------------------------------------------------------------
