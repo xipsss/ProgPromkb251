@@ -324,36 +324,29 @@ namespace GeneticSearch
             bool restart = true;
             while (restart)
             {
-                try
+                string seqChoice = ReadChoice("SEQUENCES");
+                string cmdChoice = ReadChoice("COMMANDS");
+
+                string sequencesFile = $"sequences.{seqChoice}.txt";
+                string commandsFile = $"commands.{cmdChoice}.txt";
+                string outputFile = $"genedata.{seqChoice}_{cmdChoice}.txt";
+
+                if (!CheckFile(sequencesFile) || !CheckFile(commandsFile))
                 {
-                    string seqChoice = ReadChoice("SEQUENCES");
-                    string cmdChoice = ReadChoice("COMMANDS");
-
-                    string sequencesFile = $"sequences.{seqChoice}.txt";
-                    string commandsFile = $"commands.{cmdChoice}.txt";
-                    string outputFile = $"genedata.{seqChoice}_{cmdChoice}.txt";
-
-                    if (!CheckFile(sequencesFile) || !CheckFile(commandsFile))
-                    {
-                        restart = AskRestart();
-                        continue;
-                    }
-
-                    Console.WriteLine($"\nЧтение файла: {sequencesFile}");
-                    var data = ReadData(sequencesFile);
-                    PrintProteins(data);
-
-                    Console.WriteLine($"\nЧтение файла: {commandsFile}");
-                    var commands = ReadCommands(commandsFile);
-                    Console.WriteLine($"Загружено {commands.Count} команд");
-
-                    Console.WriteLine("\n=== ОБРАБОТКА КОМАНД ===");
-                    ProcessCommands(data, commands, outputFile);
+                    restart = AskRestart();
+                    continue;
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"\nОШИБКА: {ex.Message}");
-                }
+
+                Console.WriteLine($"\nЧтение файла: {sequencesFile}");
+                var data = ReadData(sequencesFile);
+                PrintProteins(data);
+
+                Console.WriteLine($"\nЧтение файла: {commandsFile}");
+                var commands = ReadCommands(commandsFile);
+                Console.WriteLine($"Загружено {commands.Count} команд");
+
+                Console.WriteLine("\n=== ОБРАБОТКА КОМАНД ===");
+                ProcessCommands(data, commands, outputFile);
 
                 restart = AskRestart();
             }
