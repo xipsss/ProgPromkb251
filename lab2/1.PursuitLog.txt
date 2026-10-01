@@ -1,0 +1,16 @@
+Cat and Mouse
+
+Cat Mouse  Distance
+-------------------
+ ??     2
+  6    11         5
+ 12    11         1
+ 12     5         7
+ 12    11         1
+-------------------
+
+
+Distance traveled:   Mouse    Cat
+                        28      7
+
+Mouse caught at: 11
